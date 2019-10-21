@@ -24,10 +24,7 @@ export default {
 
 <style scoped lang="scss">
 #sidebar {
-  position: relative;
-  right: 0;
-  width: 600px;
-  height: 500px;
+  width: 290px;
   background: yellow;
 }
 </style>

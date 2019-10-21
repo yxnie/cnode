@@ -12,7 +12,7 @@ Vue.prototype.$axios = http;
 Vue.use(ElementUI);
 
 //响应拦截
-axios.defaults.timeout = 10000; //设置超时时间
+axios.defaults.timeout = 20000; //设置超时时间
 //过滤请求结果,只返回结果的data
 axios.interceptors.response.use(
   response => {

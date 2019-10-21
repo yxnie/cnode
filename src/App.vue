@@ -4,4 +4,13 @@
   </div>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss">
+body {
+  line-height: 20px;
+  color: #333;
+}
+a {
+  text-decoration: none;
+  text-shadow: none;
+}
+</style>
