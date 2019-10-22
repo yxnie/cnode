@@ -1,56 +1,101 @@
 <template>
-  <div class="home">
-    <top></top>
-    <div id="center">
-      <sidebar class="sidebar"></sidebar>
-      <div class="list">
-        <options></options>
-        <newList></newList>
-        <pages
-          @handleSizeChange="handleSizeChange"
-          @handleCurrentChange="handleCurrentChange"
-        ></pages>
+  <div class="list">
+    <!--    头部-->
+    <div class="header">
+      <span v-for="(item, index) in head" :key="index">
+        <a href="#" @click="run(index)" :class="{ bg: index === num }">{{
+          item
+        }}</a>
+      </span>
+    </div>
+    <!--    内容-->
+    <div
+      v-for="(item, index) in news.slice(
+        pages * (pagesNum - 1),
+        pages * pagesNum
+      )"
+      class="desc"
+      :key="index"
+    >
+      <a href=""><img :src="item.author.avatar_url" alt=""/></a>
+      <span class="count"
+        ><span class="reply">{{ item.reply_count }}</span
+        ><span class="slash">/</span
+        ><span class="visit">{{ item.visit_count }}</span></span
+      >
+      <a href="" class="time"><img src="" alt=""/><span></span></a>
+      <div>
+        <span v-if="item.top" class="top">置顶</span>
+        <span v-else-if="item.tab === 'share'" class="tab">分享</span>
+        <span v-else-if="item.tab === 'ask'" class="tab">问答</span>
+        <a class="title" href="" @click.prevent="skip(item)">{{
+          item.title
+        }}</a>
       </div>
     </div>
-    <bottom></bottom>
+    <!--    翻页-->
+    <div class="block">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="40"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="40"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
-import bottom from "../components/bottom/Bottom";
-import top from "../components/top/Top";
-import sidebar from "../components/sidebar/Sidebar";
-import options from "../components/options/Options";
-import pages from "../components/pages/Pages";
-import newList from "../components/newlist/Newlist";
 export default {
-  name: "home",
-  components: {
-    bottom,
-    top,
-    sidebar,
-    options,
-    pages,
-    newList
-  },
+  name: "Newlist",
+  components: {},
   props: {},
   data() {
     return {
-      page: 0,
-      num: 0
+      news: [], //数据
+      num: 0, //点击判断
+      head: ["全部", "精华", "分享", "问答", "招聘", "客户端测试"],
+      currentPage: 1, //初始页数
+      pages: 40, //每页条数
+      pagesNum: 1 //页数
     };
   },
   methods: {
+    //获取数据
+    getNew() {
+      this.$axios
+        .req("/api/topics")
+        .then(res => {
+          this.news = res.data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    //翻页事件
     handleSizeChange(val) {
-      // this.$emit("handleSizeChange", val);
-      this.page = val;
+      console.log(`每页 ${val} 条`);
+      this.pages = val;
     },
     handleCurrentChange(val) {
-      // this.$emit("handleCurrentChange", val);
-      this.num = val;
+      console.log(`当前页: ${val}`);
+      this.pagesNum = val;
+    },
+    //点击效果
+    run(data) {
+      this.num = data;
+    },
+    skip(data) {
+      this.$router.push({ name: "particulars", query: { id: data.id } });
     }
   },
-  mounted() {},
+  mounted() {
+    this.getNew();
+  },
   created() {},
   filters: {},
   computed: {},
@@ -60,26 +105,97 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.home {
-  background-color: #e1e1e1;
-  font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma,
-    "Hiragino Sans GB", STHeiti, sans-serif !important;
-  line-height: 20px;
-  color: #333;
-  #center {
-    width: 90%;
-    max-width: 1400px;
-    min-width: 960px;
-    margin: 15px auto;
-    min-height: 400px;
-    font-size: 14px;
-    position: relative;
-    .list {
-      margin-right: 305px;
+.list {
+  line-height: 2em;
+  /*头部*/
+  .header {
+    padding: 10px;
+    background-color: #f6f6f6;
+    border-radius: 3px 3px 0 0;
+    a {
+      color: #80bd01;
+      padding: 3px 4px;
+      border-radius: 3px;
+      margin: 0 10px;
+      &:hover {
+        color: #08c;
+      }
     }
-    .sidebar {
-      position: absolute;
-      right: 0;
+    .bg {
+      background-color: #80bd01;
+      color: #fff !important;
+    }
+  }
+  /*翻页*/
+  .block {
+    background-color: #f6f6f6;
+  }
+  /*内容*/
+  .desc {
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    position: relative;
+    padding: 10px 0 10px 10px;
+    font-size: 14px;
+    overflow: hidden;
+    display: flex;
+  }
+  img {
+    display: block;
+    width: 30px;
+    height: 30px;
+  }
+  .time {
+    position: absolute;
+    right: 0;
+  }
+  .top {
+    background: #80bd01;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 12px;
+  }
+  .tab {
+    background-color: #e5e5e5;
+    color: #999;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+  .title {
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px;
+    max-width: 70%;
+    line-height: 30px;
+    margin-left: 3px;
+    color: black;
+    &:hover {
+      text-decoration: underline;
+    }
+    /*&:active {*/
+    /*  color: #888;*/
+    /*}*/
+  }
+  .count {
+    width: 70px;
+    text-align: center;
+    .reply {
+      color: #9e78c0;
+      word-break: break-word;
+      line-height: 2em;
+    }
+    .visit {
+      font-size: 10px;
+      color: #b4b4b4;
+      word-break: break-word;
+      line-height: 2em;
+    }
+    .slash {
+      margin: 0 2px;
+      font-size: 10px;
     }
   }
 }

@@ -4,11 +4,13 @@ import router from "./router";
 import store from "./store";
 import http from "./http";
 import axios from "axios";
+import dayjs from "dayjs";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 
 Vue.config.productionTip = false;
 Vue.prototype.$axios = http;
+Vue.prototype.$dayjs = dayjs;
 Vue.use(ElementUI);
 
 //响应拦截
