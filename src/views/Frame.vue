@@ -58,7 +58,7 @@ export default {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
       that.scrollTop = scrollTop;
-      if (that.scrollTop > 100) {
+      if (that.scrollTop > 200) {
         that.btnFlag = true;
       } else {
         that.btnFlag = false;

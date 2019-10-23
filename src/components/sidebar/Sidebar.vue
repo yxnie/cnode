@@ -13,7 +13,7 @@
         <el-button type="success">发布话题</el-button>
       </div>
     </div>
-    <div class="login bottom padding">
+    <div class="login bottom padding" v-if="user === ''">
       <div class="word">CNode：Node.js专业中文社区</div>
       <div>您可以 <a>登录</a> 或 <a>注册</a> , 也可以</div>
       <el-button type="primary" class="but" @click.prevent="login">通过 GitHub 登录</el-button>
