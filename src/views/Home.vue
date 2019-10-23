@@ -3,7 +3,7 @@
     <!--    头部-->
     <div class="header">
       <span v-for="(item, index) in head" :key="index">
-        <a href="#" @click="run(index)" :class="{ bg: index === num }">{{
+        <a href="" @click.prevent="run(index)" :class="{ bg: index === num }">{{
           item
         }}</a>
       </span>
@@ -23,7 +23,13 @@
         ><span class="slash">/</span
         ><span class="visit">{{ item.visit_count }}</span></span
       >
-      <a href="" class="time"><img src="" alt=""/><span></span></a>
+      <a href="" class="time">
+        <span v-if="item.min">{{ item.min }} 分钟</span>
+        <span v-else-if="item.hour">{{ item.hour }} 小时</span>
+        <span v-else-if="item.day">{{ item.day }} 天</span>
+        <span v-else-if="item.month">{{ item.month }} 月</span>
+        <span v-else-if="item.year">{{ item.min }} 年</span>前
+      </a>
       <div>
         <span v-if="item.top" class="top">置顶</span>
         <span v-else-if="item.tab === 'share'" class="tab">分享</span>
@@ -50,6 +56,7 @@
 </template>
 
 <script>
+import { Loading } from "element-ui";
 export default {
   name: "Newlist",
   components: {},
@@ -61,7 +68,9 @@ export default {
       head: ["全部", "精华", "分享", "问答", "招聘", "客户端测试"],
       currentPage: 1, //初始页数
       pages: 40, //每页条数
-      pagesNum: 1 //页数
+      pagesNum: 1, //页数
+      username: "", //用户名
+      loadingInstance: null //加载loading对象
     };
   },
   methods: {
@@ -70,7 +79,25 @@ export default {
       this.$axios
         .req("/api/topics")
         .then(res => {
-          this.news = res.data;
+          if (res.data.length) {
+            this.news = res.data;
+            this.loadingInstance.close();
+            this.news.map(item => {
+              let time =
+                this.$dayjs().diff(this.$dayjs(item.last_reply_at)) / 1000;
+              if (time < 3600) {
+                item.min = Math.ceil(time / 60);
+              } else if (time < 3600 * 24) {
+                item.hour = Math.ceil(time / 3600);
+              } else if (time < 3600 * 24 * 30) {
+                item.day = Math.ceil(time / 3600 / 24);
+              } else if (time < 3600 * 24 * 365) {
+                item.month = Math.ceil(time / 3600 / 24 / 30);
+              } else {
+                item.year = Math.ceil(time / 3600 / 24 / 365);
+              }
+            });
+          }
         })
         .catch(err => {
           console.log(err);
@@ -90,11 +117,19 @@ export default {
       this.num = data;
     },
     skip(data) {
-      this.$router.push({ name: "particulars", query: { id: data.id } });
+      this.$router.push({ name: "particulars", query: { id: data.id } }); //传id到详情页
+      this.$store.state.author = data.author.loginname;
     }
   },
   mounted() {
-    this.getNew();
+    //加载页面
+    this.loadingInstance = Loading.service({
+      text: "加载中..."
+    });
+    this.$nextTick(() => {
+      // 以服务的方式调用的 Loading 需要异步关闭
+      this.getNew();
+    });
   },
   created() {},
   filters: {},
@@ -139,6 +174,11 @@ export default {
     font-size: 14px;
     overflow: hidden;
     display: flex;
+    .time {
+      margin-right: 10px;
+      color: #778087;
+      font-size: 11px;
+    }
   }
   img {
     display: block;
@@ -172,6 +212,8 @@ export default {
     line-height: 30px;
     margin-left: 3px;
     color: black;
+    overflow: hidden;
+    text-overflow: ellipsis;
     &:hover {
       text-decoration: underline;
     }

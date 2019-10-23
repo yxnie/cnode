@@ -7,7 +7,7 @@
         <span v-else-if="details.tab === 'ask'" class="tab">问答</span>
         <span class="word">{{ details.title }}</span>
       </div>
-      <div>
+      <div class="information">
         <b>·</b> 发布于&nbsp;<span>
           <span v-if="createTime < 3600"
             >{{ Math.floor(createTime / 60) }}分钟</span
@@ -37,8 +37,9 @@
     </div>
     <div class="content" v-html="details.content"></div>
     <div class="replies">
-      <div class="repliesHead">{{ details.replies.length }}&nbsp;回复</div>
-      <div v-for="(item, index) in details.replies" :key="index" class="floor">
+      <div class="repliesHead" v-if="details.replies">{{ details.replies.length }}&nbsp;回复</div>
+      <div class="repliesHead" v-else>0&nbsp;回复</div>
+      <div v-for="(item, index) in details.replies" :key="index" class="floor" :class="{bg:item.ups.length>2}">
         <a href="" class="headPortrait"
           ><img :src="item.author.avatar_url" alt=""
         /></a>
@@ -72,18 +73,19 @@
             v-if="item.author.loginname === details.author.loginname"
             >作者</span
           >
-          <div>
+          <div class="praise" v-if="item.ups.length">
             <i></i>
-            <span></span>
+            <span>{{item.ups.length}}</span>
           </div>
         </div>
-        <div class="desc"></div>
+        <div class="desc" v-html="item.content"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Loading } from "element-ui";
 export default {
   name: "Particulars",
   components: {},
@@ -92,7 +94,8 @@ export default {
     return {
       id: "", //主页传的id
       details: {}, //数据
-      createTime: "" //接受创建时间差
+      createTime: "", //接受创建时间差
+      loadingInstance: null //加载loading对象
     };
   },
   methods: {
@@ -102,6 +105,10 @@ export default {
         .req(`/api/topic/${this.id}`)
         .then(res => {
           this.details = res.data;
+          this.$nextTick(() => {
+            // 以服务的方式调用的 Loading 需要异步关闭
+            this.loadingInstance.close();
+          });
           this.createTime =
             this.$dayjs().diff(this.$dayjs(this.details.create_at)) / 1000; //获取创建时间差
           //给评论（replies）加time属性
@@ -117,6 +124,10 @@ export default {
   mounted() {
     //接收id
     this.id = this.$route.query.id;
+    //加载页面
+    this.loadingInstance = Loading.service({
+      text: "加载中..."
+    });
     this.getDetails();
   },
   created() {},
@@ -132,6 +143,10 @@ export default {
   .title {
     padding: 10px;
     background: white;
+    .information {
+      font-size: 12px;
+      color: #838383;
+    }
     .header {
       margin: 8px 0;
       .word {
@@ -165,6 +180,9 @@ export default {
   }
   .replies {
     background: white;
+    .bg {
+      background-color: #f4fcf0;
+    }
     .repliesHead {
       padding: 10px;
       color: #444 !important;
@@ -175,9 +193,27 @@ export default {
       border-top: 1px solid #f0f0f0;
       padding: 10px;
       position: relative;
+      .desc {
+        margin-left: 50px;
+        font-size: 15px;
+        line-height: 1.7em;
+      }
       .message {
         display: flex;
         padding-left: 45px;
+        position: relative;
+        .praise {
+          position: absolute;
+          right: 10px;
+          i {
+            background: url("../../assets/images/zan.svg") no-repeat;
+            display: inline-block;
+            width: 16px;
+            height: 15px;
+            margin-right: 10px;
+            background-size: cover;
+          }
+        }
       }
       .headPortrait {
         position: absolute;
@@ -191,6 +227,7 @@ export default {
       padding: 1px;
       color: #fff;
       font-size: 12px;
+      margin-left: 5px;
     }
     a {
       display: inline-block;

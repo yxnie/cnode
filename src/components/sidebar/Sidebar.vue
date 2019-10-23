@@ -1,9 +1,22 @@
 <template>
   <div id="sidebar">
+    <div v-if="user" class="user bottom">
+      <div class="padding title">个人信息</div>
+      <div class="padding">
+        <div>{{user}}</div>
+        <div>积分：0</div>
+        <div>“这家伙很懒，什么个性签名都有没有留下”</div>
+      </div>
+    </div>
+    <div  v-if="user" class="bottom">
+      <div class="issue">
+        <el-button type="success">发布话题</el-button>
+      </div>
+    </div>
     <div class="login bottom padding">
       <div class="word">CNode：Node.js专业中文社区</div>
       <div>您可以 <a>登录</a> 或 <a>注册</a> , 也可以</div>
-      <el-button type="primary" class="but">通过 GitHub 登录</el-button>
+      <el-button type="primary" class="but" @click.prevent="login">通过 GitHub 登录</el-button>
     </div>
     <div class="ad bottom padding">
       <a href=""
@@ -105,11 +118,22 @@ export default {
       ]
     };
   },
-  methods: {},
+  methods: {
+    login() {
+      this.$router.push("/login");
+    }
+  },
   mounted() {},
   created() {},
   filters: {},
-  computed: {},
+  computed: {
+    user() {
+      return this.$store.state.username;
+    },
+    author() {
+      return this.$store.state.author;
+    }
+  },
   watch: {},
   directives: {}
 };
@@ -120,6 +144,9 @@ export default {
   width: 290px;
   a {
     color: #778087;
+  }
+  .issue {
+    padding: 15px;
   }
   .bottom {
     background: white;

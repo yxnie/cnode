@@ -3,16 +3,19 @@
     <div class="main">
       <div class="con">
         <div class="front">
-          <a href=""><img src="../../assets/images/cnode.svg" alt="" class="img"></a>
-          <form class="input"><input type="text"></form>
+          <a href="" @click.prevent="home"
+            ><img src="../../assets/images/cnode.svg" alt="" class="img"
+          /></a>
+          <form class="input"><input type="text" /></form>
         </div>
         <div class="list">
-          <div><a href="">首页</a></div>
+          <div><a href="" @click.prevent="home">首页</a></div>
           <div><a href="">新手入门</a></div>
           <div><a href="">API</a></div>
           <div><a href="">关于</a></div>
           <div><a href="">注册</a></div>
-          <div><a href="">登录</a></div>
+          <div><a href="" @click.prevent="login">登录</a></div>
+          <div><a href="" @click.prevent="logOut">退出</a></div>
         </div>
       </div>
     </div>
@@ -27,7 +30,20 @@ export default {
   data() {
     return {};
   },
-  methods: {},
+  methods: {
+    login() {
+      this.$router.push("/login");
+    },
+    home() {
+      this.$router.push("/home");
+      this.$store.state.author = "";
+    },
+    logOut() {
+      this.$store.state.username = ""; //用户名注销store
+      this.$store.state.pass = ""; //密码注销store
+      localStorage.removeItem("user"); //用户名注销localstorage
+    }
+  },
   mounted() {},
   created() {},
   filters: {},
@@ -67,7 +83,6 @@ export default {
           .img {
             width: 120px;
             height: 28px;
-
           }
         }
         .input {
@@ -75,7 +90,8 @@ export default {
           display: block;
           margin-top: 6px;
           input {
-            background: url("../../assets/images/search.png") 4px 4px no-repeat #888;
+            background: url("../../assets/images/search.png") 4px 4px no-repeat
+              #888;
             width: 206px;
             padding: 3px 5px 3px 22px;
             color: #666;

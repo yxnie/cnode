@@ -1,3 +1,6 @@
 export default {
-  num: 100
+  num: 100,
+  username: "",
+  pass: "",
+  author: ""
 };
